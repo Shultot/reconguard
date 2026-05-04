@@ -3,7 +3,6 @@ import json
 import re
 import os
 import subprocess
-import shlex
 import argparse
 import xml.etree.ElementTree as ET #ElementTree instead of xmltodict to avoid having to install xmltodict
 from google import genai
@@ -26,6 +25,9 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
 #GET TARGET IP
 def get_target():
 
+    print(BANNER)
+    print("ReconGuard v1.0 | Defensive Recon Tool\n")
+    
     parser = argparse.ArgumentParser(
         description="",
         formatter_class=argparse.RawTextHelpFormatter
@@ -40,46 +42,7 @@ def get_target():
     
     args = parser.parse_args()
     return validate_input(args.target)
-    
-#VALIDATE INPUT
-def validate_input(targetIP):
-    #check that IP consists of valid characters (0-9 and ".")
-    pattern = r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}"
-    if re.match(pattern, targetIP):
-        octets = targetIP.split(".", 3)
-        if octets[0] == "10":
-            return targetIP
-        elif octets[0] == "172" and 16 <= int(octets[1]) <= 31:
-            return targetIP
-        elif octets[0] == "192" and octets[1] == "168":
-            return targetIP
-        else:
-            print("Invalid IP address.")
-            get_target()
-    else:
-        print("Invalid IP address.")
-        get_target()
-        
-    #check that first portion of IP is within private IP ranges (10, 172, and 192)
 
-    print(BANNER)
-    print("ReconGuard v1.0 | Defensive Recon Tool\n")
-
-    parser = argparse.ArgumentParser(
-        description="", 
-        formatter_class=argparse.RawTextHelpFormatter
-    )
-
-    parser.add_argument(
-        "-t",
-        "--target",
-        required=True,
-        help="Target private IPv4 address to scan. Example: 192.168.1.10"
-    )
-
-    args = parser.parse_args()
-    return validate_input(args.target)
-    
 #VALIDATE INPUT
 def validate_input(targetIP):
     pattern = r"^\d{1,3}(\.\d{1,3}){3}$"
@@ -92,7 +55,12 @@ def validate_input(targetIP):
     for octet in octets:
         if not 0 <= int(octet) <= 255:
             raise ValueError("Invalid IP address. Each number must be between 0 and 255.")
-        
+
+    # allow localhost for safe local testing
+    if targetIP == "127.0.0.1":
+        return targetIP
+
+    # private ranges       
     if octets[0] == "10":
         return targetIP
     elif octets[0] == "172" and 16 <= int(octets[1]) <= 31:
@@ -107,15 +75,6 @@ def nmap_command(validatedIP):
     #build nmap command to run with target IP
     #nmap -sV <targetIP> -oX scan.xml
     #XML IS READABLE MID-SCAN. SEARCH FOR MITIGATIONS
-
-    return ["nmap", "-sV", validatedIP, "-oX", "scan.xml"]
-
-#RUN COMMAND
-def run_command(command):
-    #use os.subprocess module to run command in terminal
-    args = shlex.split(command)
-    print("Scanning with Nmap...")
-    subprocess.run(args, capture_output=True, text=True)
 
     return ["nmap", "-sV", validatedIP, "-oX", "scan.xml"]
 
@@ -237,10 +196,7 @@ def print_report(report, filename="report.txt"):
         print("=" * 60, file=file)
 
         for i, device in enumerate(devices, 1):
-
-            print(f"{i}. {device["device_name"]} ({device["ip_address"]})", file=file)
-            print(f"    Description:  {device["description"]}", file=file)
-
+            
             print(f"{i}. {device['device_name']} ({device['ip_address']})", file=file)
             print(f"    Description:  {device['description']}", file=file)
 
@@ -250,10 +206,6 @@ def print_report(report, filename="report.txt"):
         print("=" * 60, file=file)
 
         for i, finding in enumerate (findings, 1):
-
-            print(f"{i}. {finding["device_name"]}", file=file)
-            print(f"    Details:  {finding["details"]}", file=file)
-            print(f"    Recommendations: {finding["recommendations"]}", file=file)
 
             print(f"{i}. {finding['device_name']}", file=file)
             print(f"    Details:  {finding['details']}", file=file)
@@ -284,6 +236,11 @@ def main():
         nmapJson = xml_json()
         remove_file("scan.xml")
 
+        # handle empty scan results
+        if not nmapJson.get("hosts"):
+            print("Error: No scan results found. Please check the target and try again.")
+            return
+
         # create a prompt with the json and send to llm
         prompt = generate_prompt(nmapJson)
         report = call_LLM(prompt)
@@ -293,6 +250,15 @@ def main():
 
     except ValueError as error:
         print(f"Error: {error}")
+    
+    except FileNotFoundError:
+        print("Error: Required file was not found. Please try running the scan again.")
+    
+    except ET.ParseError:
+        print("Error: Could not read the scan results. The XML file may be empty or damaged.")
+    
+    except Exception:
+        print("Error: Something went wrong. Please check your input and try again.")
 
 if __name__ == "__main__":
     main()
