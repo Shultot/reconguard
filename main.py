@@ -1,5 +1,4 @@
-
-
+import shutil
 import json
 import re
 import os
@@ -9,8 +8,6 @@ import argparse
 import xml.etree.ElementTree as ET #ElementTree instead of xmltodict to avoid having to install xmltodict
 from google import genai
 
-<<<<<<< HEAD
-=======
 BANNER = r"""
   ____                        ____                     _
  |  _ \ ___  ___ ___  _ __  / ___|_   _  __ _ _ __ __| |
@@ -19,7 +16,6 @@ BANNER = r"""
  |_| \_\___|\___\___/|_| |_|\____|\__,_|\__,_|_|  \__,_|
 """
 
->>>>>>> 535d2c8 (Add CLI interface, improve validation, and enhance UX)
 MODEL_NAME = "gemini-3-flash-preview"
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
 
@@ -29,10 +25,21 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
 
 #GET TARGET IP
 def get_target():
-<<<<<<< HEAD
-    targetIP = input("Target address: ")
-    validIP = validate_input(targetIP)
-    return validIP
+
+    parser = argparse.ArgumentParser(
+        description="",
+        formatter_class=argparse.RawTextHelpFormatter
+    )
+
+    parser.add_argument(
+        "-t",
+        "--target",
+        required=True,
+        help="Target private IPv4 address (example: 192.168.1.10)"
+    )
+    
+    args = parser.parse_args()
+    return validate_input(args.target)
     
 #VALIDATE INPUT
 def validate_input(targetIP):
@@ -55,7 +62,6 @@ def validate_input(targetIP):
         
     #check that first portion of IP is within private IP ranges (10, 172, and 192)
 
-=======
     print(BANNER)
     print("ReconGuard v1.0 | Defensive Recon Tool\n")
 
@@ -96,16 +102,13 @@ def validate_input(targetIP):
     else:
         raise ValueError("Invalid target. Only private IP addresses are allowed.")
                     
->>>>>>> 535d2c8 (Add CLI interface, improve validation, and enhance UX)
 #CONSTRUCT COMMAND
 def nmap_command(validatedIP):
     #build nmap command to run with target IP
     #nmap -sV <targetIP> -oX scan.xml
     #XML IS READABLE MID-SCAN. SEARCH FOR MITIGATIONS
 
-<<<<<<< HEAD
-    command = f"nmap -sV {validatedIP} -oX scan.xml" 
-    return command
+    return ["nmap", "-sV", validatedIP, "-oX", "scan.xml"]
 
 #RUN COMMAND
 def run_command(command):
@@ -113,7 +116,7 @@ def run_command(command):
     args = shlex.split(command)
     print("Scanning with Nmap...")
     subprocess.run(args, capture_output=True, text=True)
-=======
+
     return ["nmap", "-sV", validatedIP, "-oX", "scan.xml"]
 
 #RUN COMMAND
@@ -121,7 +124,7 @@ def run_command(command):
     print("Scanning with Nmap...")
     #use os.subprocess module to run command in terminal
     subprocess.run(command, capture_output=True, text=True)
->>>>>>> 535d2c8 (Add CLI interface, improve validation, and enhance UX)
+
     print("Scan complete.")
 
 #XML TO JSON
@@ -234,28 +237,28 @@ def print_report(report, filename="report.txt"):
         print("=" * 60, file=file)
 
         for i, device in enumerate(devices, 1):
-<<<<<<< HEAD
+
             print(f"{i}. {device["device_name"]} ({device["ip_address"]})", file=file)
             print(f"    Description:  {device["description"]}", file=file)
-=======
+
             print(f"{i}. {device['device_name']} ({device['ip_address']})", file=file)
             print(f"    Description:  {device['description']}", file=file)
->>>>>>> 535d2c8 (Add CLI interface, improve validation, and enhance UX)
+
 
         print("\n" + "=" * 60, file=file)
         print("ANALYSIS AND RECOMMENDATIONS", file=file)
         print("=" * 60, file=file)
 
         for i, finding in enumerate (findings, 1):
-<<<<<<< HEAD
+
             print(f"{i}. {finding["device_name"]}", file=file)
             print(f"    Details:  {finding["details"]}", file=file)
             print(f"    Recommendations: {finding["recommendations"]}", file=file)
-=======
+
             print(f"{i}. {finding['device_name']}", file=file)
             print(f"    Details:  {finding['details']}", file=file)
             print(f"    Recommendations: {finding['recommendations']}", file=file)
->>>>>>> 535d2c8 (Add CLI interface, improve validation, and enhance UX)
+
     print("Report complete.")
 
 #FILE DELETION
@@ -264,48 +267,32 @@ def remove_file(filename):
         os.remove(filename)
 
 def main():
-<<<<<<< HEAD
-
-    #validate target IP
-    validIP = get_target()
-
-    #construct and run nmap command
-    command = nmap_command(validIP)
-    run_command(command)
-
-    #convert nmap xml to json and delete xml file
-    nmapJson = xml_json()
-    remove_file("scan.xml")
-
-    #create a prompt with the json and send to llm
-    prompt = generate_prompt(nmapJson)
-    report = call_LLM(prompt)
-
-    #save the report as a text file | WILL BE CHANGED TO A MORE SECURE FILE FORMAT IN FINAL RELEASE
-    print_report(report)
-=======
     try:
+        # check if nmap is installed
+        if not shutil.which("nmap"):
+            print("Error: Nmap is not installed. Please install Nmap first.")
+            return
 
-        #validate target IP
+        # validate target IP
         validIP = get_target()
 
-        #construct and run nmap command
+        # construct and run nmap command
         command = nmap_command(validIP)
         run_command(command)
 
-        #convert nmap xml to json and delete xml file
+        # convert nmap xml to json and delete xml file
         nmapJson = xml_json()
         remove_file("scan.xml")
 
-        #create a prompt with the json and send to llm
+        # create a prompt with the json and send to llm
         prompt = generate_prompt(nmapJson)
         report = call_LLM(prompt)
 
-        #save the report as a text file | WILL BE CHANGED TO A MORE SECURE FILE FORMAT IN FINAL RELEASE
+        # save the report as a text file
         print_report(report)
+
     except ValueError as error:
         print(f"Error: {error}")
->>>>>>> 535d2c8 (Add CLI interface, improve validation, and enhance UX)
 
 if __name__ == "__main__":
     main()
