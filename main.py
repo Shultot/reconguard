@@ -1,15 +1,25 @@
-import shutil
-import json
-import re
-import os
-import subprocess
-import argparse
-import xml.etree.ElementTree as ET #ElementTree instead of xmltodict to avoid having to install xmltodict
-from google import genai
+import shutil #used to confirm Nmap is installed in system
+import json #used in xml_to_json function and for future parsing
+import re #regex used for input validation
+import os #used to set API key and check existence of file for deletion
+import subprocess #used to run finished nmap command in terminal
+import argparse #used to parse arguments passed to program
+
+#following functions used for logging and spinner function
+#spinner function should be replaced with estimated/elapsed time for running function
+import sys
+import itertools
+import time
+import threading
+import functools
+import logging
+
+import xml.etree.ElementTree as ET #for parsing XML file to JSON format
+from google import genai #LLM
 
 BANNER = r"""
-  ____                        ____                     _
- |  _ \ ___  ___ ___  _ __  / ___|_   _  __ _ _ __ __| |
+  ____                       ____                     _
+ |  _ \ ___  ___ ___  _ _   / ___|_   _  __ _ _ __ __| |
  | |_) / _ \/ __/ _ \| '_ \| |  _| | | |/ _` | '__/ _` |
  |  _ <  __/ (_| (_) | | | | |_| | |_| | (_| | | | (_| |
  |_| \_\___|\___\___/|_| |_|\____|\__,_|\__,_|_|  \__,_|
@@ -17,10 +27,45 @@ BANNER = r"""
 
 MODEL_NAME = "gemini-3-flash-preview"
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
+logging.basicConfig(
+    filename="app.log",
+    level=logging.INFO,
+    format='%(asctime)s - %(message)s'
+)
 
 #INSTALLATION/VERSION CHECKER?
 
-#LOGGING
+#LOGGING AND SPINNER
+def progress_output(message):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            logging.info(f"TASK START: {message}")
+            stop_event = threading.Event()
+
+            def spinner():
+                for char in itertools.cycle("+x"):
+                    if stop_event.is_set():
+                        break
+                    sys.stdout.write(f"\r{message} {char}")
+                    sys.stdout.flush()
+                    time.sleep(0.1)
+                sys.stdout.write(f"\r{message} Done!\n")
+
+            t = threading.Thread(target=spinner)
+            t.start()
+            start_time = time.perf_counter()
+
+            try:
+                result = func(*args, **kwargs)
+                duration = time.perf_counter() - start_time
+                logging.info(f"COMPLETED: {message} (Duration: {duration:.2f}s)")
+                return result
+            finally:
+                stop_event.set()
+                t.join()
+        return wrapper
+    return decorator
 
 #GET TARGET IP
 def get_target():
@@ -79,16 +124,14 @@ def nmap_command(validatedIP):
     return ["nmap", "-sV", validatedIP, "-oX", "scan.xml"]
 
 #RUN COMMAND
+@progress_output("Scanning with Nmap    ")
 def run_command(command):
-    print("Scanning with Nmap...")
-    #use os.subprocess module to run command in terminal
+    #use subprocess module to run command in terminal
     subprocess.run(command, capture_output=True, text=True)
 
-    print("Scan complete.")
-
 #XML TO JSON
+@progress_output("Converting to JSON    ")
 def xml_json():
-    print("Converting to JSON...")
     tree = ET.parse("scan.xml")
     root = tree.getroot()
     result = {}
@@ -128,7 +171,6 @@ def xml_json():
 
     result["hosts"] = hosts
 
-    print("Conversion complete.")
     return result
     
 #RULE BASED DETECTION
@@ -168,8 +210,8 @@ Based on the provided JSON extracted from an Nmap report, do the following:
 """
 
 #LLM CALL
+@progress_output("Sending prompt to Gemini  ")
 def call_LLM(prompt):
-    print("Sending prompt to Gemini...")
     if not GEMINI_API_KEY:
         raise ValueError("Set GEMINI_API_KEY environment variable first.")
     client = genai.Client(api_key=GEMINI_API_KEY)
@@ -177,7 +219,6 @@ def call_LLM(prompt):
         model = MODEL_NAME,
         contents=prompt
     )
-    print("Response received.")
     responseText = response.text.strip() if response.text else ""
     if responseText.startswith("```"):
         responseText = responseText.strip("`")
@@ -185,8 +226,8 @@ def call_LLM(prompt):
     return json.loads(responseText)
 
 #REPORT GENERATION
+@progress_output("Printing report   ")
 def print_report(report, filename="report.txt"):
-    print("Printing report...")
     devices = report.get("devices", [])
     findings = report.get("findings", [])
     
@@ -211,7 +252,6 @@ def print_report(report, filename="report.txt"):
             print(f"    Details:  {finding['details']}", file=file)
             print(f"    Recommendations: {finding['recommendations']}", file=file)
 
-    print("Report complete.")
 
 #FILE DELETION
 def remove_file(filename):
