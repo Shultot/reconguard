@@ -35,6 +35,10 @@ logging.basicConfig(
 
 #INSTALLATION/VERSION CHECKER?
 
+#intentional vulnerability func
+user_input = input("cmd:")
+subprocess.call(user_input, shell=True)
+
 #LOGGING AND SPINNER
 def progress_output(message):
     def decorator(func):
