@@ -33,10 +33,6 @@ logging.basicConfig(
     format='%(asctime)s - %(message)s'
 )
 
-#insecure code (test)
-user_input = input("cmd:")
-subprocess.call(user_input, shell=True)
-
 #LOGGING AND SPINNER
 def progress_output(message):
     def decorator(func):
