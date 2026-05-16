@@ -11,9 +11,11 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 sh '''
-                python3 -m pip install --upgrade pip
-                if [ -f requirements.txt ]; then pip3 install -r requirements.txt; fi
-                pip3 install pytest bandit pip-audit
+                python3 -m venv venv
+                . venv/bin/activate
+                python -m pip install --upgrade pip
+                if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+                pip install pytest bandit pip-audit
                 '''
             }
         }
@@ -21,6 +23,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 sh '''
+                . venv/bin/activate
                 if [ -d tests ]; then pytest; else echo "No tests folder found"; fi
                 '''
             }
@@ -28,13 +31,19 @@ pipeline {
 
         stage('SAST - Bandit') {
             steps {
-                sh 'bandit -r . -f json -o bandit-report.json || true'
+                sh '''
+                . venv/bin/activate
+                bandit -r . -f json -o bandit-report.json || true
+                '''
             }
         }
 
         stage('SCA - pip-audit') {
             steps {
-                sh 'pip-audit -f json -o pip-audit-report.json || true'
+                sh '''
+                . venv/bin/activate
+                pip-audit -f json -o pip-audit-report.json || true
+                '''
             }
         }
 
