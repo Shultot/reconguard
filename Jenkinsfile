@@ -33,7 +33,7 @@ pipeline {
             steps {
                 sh '''
                 . venv/bin/activate
-                bandit -r . -f json -o bandit-report.json || true
+                bandit -r . -f json -o bandit-report.json
                 '''
             }
         }
