@@ -30,7 +30,7 @@ jobs:
           if [ -d tests ]; then pytest; else echo "No tests folder found"; fi
 
       - name: Run Bandit security scan
-        run: bandit -r . -f json -o bandit-report.json || true
+        run: bandit -r . -f json -o bandit-report.json
 
       - name: Run dependency scan
         run: pip-audit -f json -o pip-audit-report.json || true
