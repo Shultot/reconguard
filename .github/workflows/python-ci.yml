@@ -25,15 +25,16 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install pytest bandit pip-audit
 
-      - name: Run tests
-        run: |
-          if [ -d tests ]; then pytest; else echo "No tests folder found"; fi
-
       - name: Run Bandit security scan
         run: bandit -r . -x ./venv,./.venv -f json -o bandit-report.json
 
       - name: Run dependency scan
         run: pip-audit -f json -o pip-audit-report.json || true
+
+      - name: Run tests
+        run: |
+          if [ -d tests ]; then pytest; else echo "No tests folder found"; fi
+
 
       - name: Upload reports
         uses: actions/upload-artifact@v4
