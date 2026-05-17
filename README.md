@@ -6,9 +6,17 @@ ReconGuard is a security reconnaissance tool designed to automate network scanni
 
 * Automated network scanning
 * Input validation for secure execution
-* Parsing of scan results
-* Structured report generation
+* Run Nmap scans
+* Convert Nmap XML output to JSON
+* Analyze exposed services
+* Structured report generation (clear recommendations)
 * Modular architecture (scanner, parser, detector, report)
+
+## Requirements
+
+* Python 3.11+
+* Nmap
+* pip
 
 ## Project Structure
 
