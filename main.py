@@ -5,6 +5,7 @@ import os #used to set API key and check existence of file for deletion
 #Used to run Nmap with validated input and shell=False
 import subprocess # nosec B404
 import argparse #used to parse arguments passed to program
+import ipaddress #used for ipv6 implementation
 
 #following functions used for logging and spinner function
 #spinner function should be replaced with estimated/elapsed time for running function
@@ -89,6 +90,17 @@ def get_target():
 
 #VALIDATE INPUT
 def validate_input(targetIP):
+
+    # IPv6 support
+    try:
+        ip = ipaddress.ip_address(targetIP)
+
+        if isinstance(ip, ipaddress.IPv6Address):
+            # REMOVE interface zone index for Nmap compatibility
+            return str(ip).split('%')[0]
+    except ValueError:
+        pass
+
     pattern = r"^\d{1,3}(\.\d{1,3}){3}$"
 
     if not re.match(pattern, targetIP):
@@ -119,6 +131,10 @@ def nmap_command(validatedIP):
     #build nmap command to run with target IP
     #nmap -sV <targetIP> -oX scan.xml
     #XML IS READABLE MID-SCAN. SEARCH FOR MITIGATIONS
+    ip = ipaddress.ip_address(validatedIP)
+
+    if isinstance(ip, ipaddress.IPv6Address):
+        return ["nmap", "-6", "-sV", validatedIP, "-oX", "scan.xml"]
 
     return ["nmap", "-sV", validatedIP, "-oX", "scan.xml"]
 
@@ -127,6 +143,7 @@ def nmap_command(validatedIP):
 def run_command(command):
     # Command is constructed as a list from validated input
     subprocess.run(command, capture_output=True, text=True) # nosec B603
+
 
 #XML TO JSON
 @progress_output("Converting to JSON    ")
