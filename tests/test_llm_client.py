@@ -1,10 +1,6 @@
 import pytest
 from main import generate_prompt, call_LLM
 
-@pytest.fixture(autouse=True)
-def mock_set_key(monkeypatch):
-    monkeypatch.setenv("GEMINI_API_KEY", "fake_key")
-
 def test_generate_prompt():
     sample_json = {
         "hosts": [
