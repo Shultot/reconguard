@@ -21,9 +21,15 @@ def test_valid_ip(valid_ip):
     "hello",
     "192.168.1.1;",
     "192.168.1.1 && whoami",
-    ""
+    "",
+    "2001:4860:4860::8888",
+    "gggg::1"
 ])
 
 def test_invalid_ipv4(invalid_ip):
     with pytest.raises(ValueError):
         validate_input(invalid_ip)
+        
+def test_invalid_format_message():
+    with pytest.raises(ValueError, match="IPv4 or IPv6"):
+        validate_input("hello")
