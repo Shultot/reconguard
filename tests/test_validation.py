@@ -9,7 +9,6 @@ from main import validate_input
     "::1",
     "fe80::1"
 ])
-
 def test_valid_ip(valid_ip):
     actual_output = validate_input(valid_ip)
     assert actual_output == valid_ip
@@ -25,11 +24,10 @@ def test_valid_ip(valid_ip):
     "2001:4860:4860::8888",
     "gggg::1"
 ])
-
-def test_invalid_ipv4(invalid_ip):
+def test_invalid_ip(invalid_ip):
     with pytest.raises(ValueError):
         validate_input(invalid_ip)
-        
+
 def test_invalid_format_message():
     with pytest.raises(ValueError, match="IPv4 or IPv6"):
         validate_input("hello")
