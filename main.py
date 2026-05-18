@@ -309,14 +309,13 @@ JSON:
 {json.dumps(report, indent=2)}
 
 Based on the provided JSON extracted from an Nmap report, do the following:
-<<<<<<< HEAD
+
 - Create a list of devices connected to the network
 - Explain the Nmap reports findings in plain language
 - List any recommendations to improve security
 - Present recommendations as a numbered list, each number on a new line
 - Sort recommendations based on severity
 - Respond ONLY in valid JSON format:
-=======
 - Create a list of devices connected to the network.
 - Identify each meaningful open service as a separate security finding.
 - Assign a severity level to each finding: Critical, High, Medium, Low, or Informational.
@@ -326,7 +325,7 @@ Based on the provided JSON extracted from an Nmap report, do the following:
 - Respond ONLY in valid JSON format.
 
 Use this exact JSON structure:
->>>>>>> 49ba979 (Improve frontend UI and reporting flow)
+
 
 {{
     "devices": [
@@ -489,68 +488,39 @@ def remove_file(filename):
 # main
 def main():
     try:
-        # check if nmap is installed
         if not shutil.which("nmap"):
             print("Error: Nmap is not installed. Please install Nmap first.")
             return
+
         if not GEMINI_API_KEY:
             raise ValueError("Set GEMINI_API_KEY environment variable first.")
 
-        # validate target IP
         validIP = get_target()
 
-        # construct and run nmap command
         command = nmap_command(validIP)
         run_command(command)
 
-        # convert nmap xml to json and delete xml file
         unfilteredData = xml_json("scan.xml", isFile=True)
         filteredData = rules(unfilteredData)
         remove_file("scan.xml")
 
-<<<<<<< HEAD
-        # handle empty scan results
         if not filteredData.get("hosts"):
-            print("Error: No scan results found. Please check the target and try again.")
-=======
-        # handle no open ports or active service scan results
-        has_open_ports = any(
-            port.get("state") == "open"
-            for host in nmapJson.get("host", [])
-            for port in host.get("port", [])
-        )
-
-        if not has_open_ports:
             print("Scan completed successfully, but no open ports or active services were detected.")
->>>>>>> 49ba979 (Improve frontend UI and reporting flow)
             return
 
-        # create a prompt with the json and send to llm
         prompt = generate_prompt(filteredData)
         report = call_LLM(prompt)
 
-        # save the report as a text file
         print_report(report)
+
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Scan cancelled by user.[/yellow]")
 
     except ValueError as error:
         print(f"Error: {error}")
 
     except FileNotFoundError:
         print("Error: Required file was not found. Please try running the scan again.")
-<<<<<<< HEAD
-    
-    #except ET.ParseError:
-    #    print("Error: Could not read the scan results. The XML file may be empty or damaged.")
-    
-    except Exception:
-        print("Error: Something went wrong. Please check your input and try again.")
-=======
-
-    except ET.ParseError:
-        print("Error: Could not read the scan results. The XML file may be empty or damaged.")
-
-    except KeyboardInterrupt:
-        console.print("\n[yellow]Scan cancelled by user.[/yellow]")
 
     except Exception as error:
         error_text = str(error)
@@ -562,9 +532,8 @@ def main():
             print("Error: Gemini API key is missing. Please set the GEMINI_API_KEY environment variable.")
 
         else:
-            print("Error: Something went wrong. Please check your input and try again.")
+            print(f"Error details: {error}")
 
->>>>>>> 49ba979 (Improve frontend UI and reporting flow)
 
 if __name__ == "__main__":
     main()
