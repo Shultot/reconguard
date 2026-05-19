@@ -1,3 +1,4 @@
+import xmltodict
 from datetime import datetime
 import textwrap
 import time #timestamp
@@ -138,6 +139,35 @@ def get_target():
 
 #VALIDATE INPUT
 def validate_input(targetIP):
+    """
+    Validate the user-provided target IP.
+
+    Allows:
+    - Private or loopback IPv4 addresses
+    - Private or loopback IPv6 addresses
+
+    Rejects:
+    - Public IP addresses
+    - Invalid IP formats
+    - Command-injection characters such as ;, &, |, `, $, <, >, and \
+    """
+
+    dangerous_chars = r"[;&|`$<>\\]"
+
+    # Make sure input exists
+    if targetIP is None:
+        raise ValueError("Invalid target. Target cannot be empty.")
+
+    # Remove extra spaces before/after the target
+    targetIP = targetIP.strip()
+
+    if not targetIP:
+        raise ValueError("Invalid target. Target cannot be empty.")
+
+    # Reject command injection characters
+    if re.search(dangerous_chars, targetIP):
+        raise ValueError("Invalid target. Command characters are not allowed.")
+
     try:
         ip = ipaddress.ip_address(targetIP)
 
@@ -145,12 +175,14 @@ def validate_input(targetIP):
         if isinstance(ip, ipaddress.IPv4Address):
             if ip.is_private or ip.is_loopback:
                 return str(ip)
+
             raise ValueError("Invalid target. Only private or loopback IPv4 addresses are allowed.")
 
         # Allow safe IPv6 targets: private ranges and loopback
         if isinstance(ip, ipaddress.IPv6Address):
             if ip.is_private or ip.is_loopback:
                 return str(ip).split("%")[0]
+
             raise ValueError("Invalid target. Only private or loopback IPv6 addresses are allowed.")
 
     except ValueError as error:
@@ -518,6 +550,7 @@ def main():
 
     except ValueError as error:
         print(f"Error: {error}")
+        sys.exit(1)
 
     except FileNotFoundError:
         print("Error: Required file was not found. Please try running the scan again.")
