@@ -3,7 +3,10 @@ import shutil
 import logging
 from dotenv import load_dotenv
 
+load_dotenv()
+
 MODEL_NAME = "gemini-3-flash-preview"
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
 DEFAULT_LOG_FILE="app.log"
 DEFAULT_XML_FILE = "scan.xml"
 DEFAULT_REPORT_FILE = "report.pdf"
