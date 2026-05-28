@@ -5,7 +5,10 @@ __pycache__/
 
 # Project Generated files
 *.log
-*.txt
+*.pdf
+
+# Environment files
+.env
 
 # C extensions
 *.so
