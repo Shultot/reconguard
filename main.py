@@ -5,10 +5,12 @@ from src.parser import xml_json, rules
 from src.prompt_builder import generate_prompt
 from src.llm_client import call_LLM
 from src.reporter import print_report, remove_file, console
+from src.config import check_environment
 
 # main
 def main():
     try:
+        check_environment()
         validIP = get_target()
         command = nmap_command(validIP)
         run_command(command)
