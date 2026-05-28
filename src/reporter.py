@@ -157,11 +157,29 @@ def build_from_json(json_data):
             story.append(Paragraph(title_text, finding_title))
             
             # Target Context Table (A mini-grid containing Host/Port/Service environment variables)
+            # Target Context Table
             context_data = [
-                [Paragraph(f"<b>Host Target:</b> {finding.get('host', 'N/A')} ({finding.get('ip_address', 'N/A')})", body_style),
-                 Paragraph(f"<b>Service:</b> {finding.get('service', 'N/A')} (v{finding.get('version', 'Unknown')})", body_style)],
-                [Paragraph(f"<b>Target Port:</b> {finding.get('port', 'N/A')}", body_style),
-                 Paragraph(f"<b>Status:</b> {finding.get('status', 'N/A')}", body_style)]
+                [
+                    Paragraph(
+                        f"<b>Host Target:</b> {finding.get('host', 'N/A')} ({finding.get('ip_address', 'N/A')})",
+                        body_style
+                    ),
+                    Paragraph(
+                        f"<b>Service:</b> {finding.get('service', 'N/A')} (v{finding.get('version', 'Unknown')})",
+                        body_style
+                    )
+                ],
+                [
+                    Paragraph(f"<b>Target Port:</b> {finding.get('port', 'N/A')}", body_style),
+                    Paragraph(f"<b>Status:</b> {finding.get('status', 'N/A')}", body_style)
+                ],
+                [
+                    Paragraph(f"<b>Product:</b> {finding.get('product', 'N/A')}", body_style),
+                    Paragraph(
+                        f"<b>Severity Source:</b> {finding.get('severity_source', 'No official CVE match')}",
+                        body_style
+                    )
+                ]
             ]
             context_table = Table(context_data, colWidths=[252, 252])
             context_table.setStyle(TableStyle([
@@ -170,6 +188,26 @@ def build_from_json(json_data):
                 ('TOPPADDING', (0,0), (-1,-1), 2),
             ]))
             story.append(context_table)
+            story.append(Spacer(1, 6))
+
+            # Confirmed CVE Evidence
+            confirmed_cves = finding.get("confirmed_cves", [])
+
+            story.append(Paragraph("<b>Confirmed CVE Evidence:</b>", body_style))
+
+            if confirmed_cves:
+                for cve in confirmed_cves:
+                    cve_text = (
+                        f"{cve.get('cve_id', 'N/A')} | "
+                        f"CVSS v{cve.get('cvss_version', 'N/A')} | "
+                        f"Score: {cve.get('cvss_score', 'N/A')} | "
+                        f"Severity: {cve.get('cvss_severity', 'N/A')} | "
+                        f"Source: {cve.get('source', 'NVD')}"
+                    )
+                    story.append(Paragraph(f"• {cve_text}", bullet_style))
+            else:
+                story.append(Paragraph("• No official CVE match found.", bullet_style))
+
             story.append(Spacer(1, 6))
             
             # Risk Summary Paragraph
@@ -195,7 +233,14 @@ def build_from_json(json_data):
                     for act in actions_list:
                         action_text = f"<b>[{priority.upper()}]</b> {act}"
                         story.append(Paragraph(f"• {action_text}", bullet_style))
-            
+
+            verification_step = finding.get("verification_step")
+
+            if verification_step:
+                story.append(Spacer(1, 4))
+                story.append(Paragraph("<b>Verification Step:</b>", body_style))
+                story.append(Paragraph(f"• {verification_step}", bullet_style))
+
             # Structural divider line tracking between distinct vulnerabilities
             story.append(Spacer(1, 10))
             

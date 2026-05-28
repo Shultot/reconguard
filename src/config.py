@@ -17,6 +17,12 @@ logging.basicConfig(
     format='%(asctime)s - %(message)s'
 )
 
+# Reduce noisy third-party logs that may expose external service URLs
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
+logging.getLogger("google").setLevel(logging.WARNING)
+logging.getLogger("google_genai").setLevel(logging.WARNING)
+
 load_dotenv()
 def check_environment():
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
