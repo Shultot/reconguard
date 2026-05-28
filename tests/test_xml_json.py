@@ -1,4 +1,4 @@
-from main import xml_json
+from src.parser import xml_json
 
 def test_xml_json_basic_structure(monkeypatch, tmp_path):
 

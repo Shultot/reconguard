@@ -1,4 +1,4 @@
-from main import generate_prompt
+from src.prompt_builder import generate_prompt
 
 def test_generate_prompt():
 

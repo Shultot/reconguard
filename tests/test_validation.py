@@ -1,5 +1,5 @@
 import pytest
-from main import validate_input
+from src.parser import validate_input
 
 @pytest.mark.parametrize("valid_ip", [
     "192.168.1.1",

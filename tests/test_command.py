@@ -1,5 +1,5 @@
 import pytest
-from main import nmap_command
+from src.scanner import nmap_command
 
 @pytest.mark.parametrize("valid_ip, expected_outcome", [
     (
