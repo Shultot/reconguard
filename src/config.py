@@ -27,7 +27,7 @@ load_dotenv()
 def check_environment():
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
     if not GEMINI_API_KEY:
-        raise ValueError("Set GEMINI_API_KEY environment variable first.")
+        raise ValueError("Set GEMINI_API_KEY environment variable first.\n$env:GEMINI_API_KEY = 'your-api-key-here' ")
 
     if not shutil.which("nmap"):
         raise FileNotFoundError("Error: Nmap is not installed. Please install Nmap first.")
