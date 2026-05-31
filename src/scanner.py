@@ -55,7 +55,7 @@ def run_command(command):
 
 def get_password():
     while True:
-        password = getpass.getpass("Enter encryption password for the output PDF: ")
+        password = getpass.getpass("Create encryption password for the output PDF: ")
         if not password:
             print("Error: Password cannot be blank. Please try again.\n")
             continue
