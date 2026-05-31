@@ -55,7 +55,11 @@ def run_command(command):
 
 def get_password():
     while True:
+<<<<<<< HEAD
         password = getpass.getpass("Create encrypted password for the output PDF: ")
+=======
+        password = getpass.getpass("Create encryption password for the output PDF: ")
+>>>>>>> nvd-db-integration
         if not password:
             print("Error: Password cannot be blank. Please try again.\n")
             continue
