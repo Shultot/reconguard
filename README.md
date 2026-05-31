@@ -57,6 +57,19 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+
+4. Set up your Gemini API Key:
+
+   - Go to [Google AI Studio](https://aistudio.google.com) and sign in
+   - Click **Get API Key** and create a new key
+   - Set it as an environment variable:
+
+   
+```bash
+   $env:GEMINI_API_KEY = "your-api-key-here"
+```
+
+
 ## Usage
 
 Run the main program:
