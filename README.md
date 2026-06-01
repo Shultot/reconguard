@@ -80,6 +80,47 @@ Example:
 ```bash
 python main.py --target 192.168.1.1
 ```
+## Troubleshooting
+
+**Nmap not installed**
+ReconGuard will exit with an error if Nmap is not found. Install it from [nmap.org](https://nmap.org/download.html) and ensure it is available on your system PATH.
+
+```bash
+nmap --version  # confirm Nmap is installed
+```
+
+**Invalid target input**
+Only private and loopback IPv4/IPv6 addresses are accepted. Public IPs will be rejected.
+```bash
+# Valid examples
+python main.py -t 127.0.0.1
+python main.py -t 192.168.1.1
+python main.py -t ::1
+```
+
+**GEMINI_API_KEY not set**
+If the environment variable is missing, ReconGuard will exit with setup instructions. Set it before running:
+
+```bash
+export GEMINI_API_KEY="your-api-key-here"  
+```
+
+**No scan results returned**
+If the scan completes but no findings appear, the target may have no open ports detectable from your machine. Try confirming the target is reachable:
+```bash
+ping 192.168.1.1
+```
+
+**Python package errors**
+If you see import errors, make sure your virtual environment is activated and dependencies are installed:
+```bash
+source venv/bin/activate        # Mac/Linux
+venv\Scripts\activate           # Windows
+pip install -r requirements.txt
+```
+
+**Permission issues**
+On some systems, Nmap requires elevated privileges for certain scan types. Try running with administrator or sudo access if scans fail silently.
 
 ## Security Considerations
 
