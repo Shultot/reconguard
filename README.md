@@ -105,8 +105,8 @@ Mitigations:
 
 * Web-based dashboard
 * Real-time scan monitoring
-* Additonal scan options
-* Implementation of addtional tools (ex. Wireshark)
+* Additional scan options
+* Implementation of additional tools (ex. WireShark)
 * Ability to pentest based on findings
 
 ## Contributors
