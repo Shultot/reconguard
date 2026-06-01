@@ -1,7 +1,8 @@
 from src.prompt_builder import generate_prompt
 
 def test_generate_prompt():
-
+    # Verifies that generate_prompt() includes the analyst instruction,
+    # the sample JSON data, and all required output fields in the prompt
     sample_json = {
         "hosts": [
             {

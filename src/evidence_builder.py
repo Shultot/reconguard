@@ -40,6 +40,8 @@ def build_product_keyword(port_info):
     return ""
 
 def enrich_with_cve_evidence(filtered_data):
+    # For each open port, query NVD for matching CVEs and attach the results
+    # to the port data before it is sent to the LLM
     enriched_hosts = []
 
     for host in filtered_data.get("hosts", []):
@@ -76,6 +78,7 @@ def enrich_with_cve_evidence(filtered_data):
                 "cve_evidence_source": "NVD" if cves else "No official CVE match found",
                 "confirmed_cves": cves,
                 "evidence_based_severity": evidence_severity,
+                # Prevents the LLM from overriding NVD-sourced severity
                 "llm_can_assign_severity": False,
             })
 

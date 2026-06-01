@@ -15,7 +15,7 @@ BANNER = r"""
 """
 #GET TARGET IP
 def get_target():
-
+    # Display the banner and parse the -t target argument from the command line
     print(BANNER)
     print("ReconGuard v1.0 | Defensive Recon Tool\n")
     print("Press Ctrl+C at any time to exit.\n")
@@ -54,6 +54,8 @@ def run_command(command):
     subprocess.run(command, capture_output=True, text=True) # nosec B603
 
 def get_password():
+    # Prompt the user to create and confirm an encryption password for the PDF report
+    # Rejects blank passwords and mismatched confirmations
     while True:
         password = getpass.getpass("Create encryption password for the output PDF: ")
         if not password:

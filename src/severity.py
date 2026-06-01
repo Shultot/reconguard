@@ -1,3 +1,4 @@
+# Severity ranking used to determine the highest CVE severity across multiple matches
 SEVERITY_ORDER = {
     "CRITICAL": 4,
     "HIGH": 3,
@@ -8,6 +9,8 @@ SEVERITY_ORDER = {
 
 
 def choose_highest_cve_severity(cves):
+    # Iterate all returned CVEs and return the highest severity level found
+    # Returns "Unknown" if no CVEs were matched
     if not cves:
         return "Unknown"
 

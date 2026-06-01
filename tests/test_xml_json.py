@@ -1,7 +1,8 @@
 from src.parser import xml_json
 
 def test_xml_json_basic_structure(monkeypatch, tmp_path):
-
+    # Verifies that xml_json() correctly parses a minimal Nmap XML scan
+    # and returns the expected host, IP, status, and port details
     sample_xml = """<?xml version="1.0"?>
     <nmaprun>
         <host>

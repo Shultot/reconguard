@@ -1,6 +1,7 @@
 import pytest
 from src.scanner import nmap_command
-
+# Confirms nmap_command() builds the correct argument list for IPv4 and IPv6 targets
+# IPv6 targets must include the -6 flag
 @pytest.mark.parametrize("valid_ip, expected_outcome", [
     (
         "192.168.1.1",
@@ -24,6 +25,7 @@ def test_command_construction(valid_ip, expected_outcome):
     assert actual_output == expected_outcome
 
 def test_list_return():
+    # Confirms the command is returned as a list of strings, required for shell=False execution
     actual_outcome = nmap_command("192.168.1.1")
     assert isinstance(actual_outcome, list)
     assert all(isinstance(item, str) for item in actual_outcome)

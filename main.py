@@ -11,21 +11,21 @@ from src.evidence_builder import enrich_with_cve_evidence
 # main
 def main():
     try:
-        check_environment()
-        validIP = get_target()
+        check_environment()     # Verify Gemini API key and Nmap are available
+        validIP = get_target()  # Parse and validate the target IP from the -t flag
         command = nmap_command(validIP)
-        run_command(command)
+        run_command(command)    # Execute Nmap and write output to scan.xml
         unfilteredData = xml_json("scan.xml", isFile=True)
-        filteredData = rules(unfilteredData)
-        remove_file("scan.xml")
+        filteredData = rules(unfilteredData)    # Retain only up hosts with open ports
+        remove_file("scan.xml")                 # Clean up scan file after parsing
         if not filteredData.get("hosts"):
             print("Scan completed successfully, but no open ports or active services were detected.")
             return
-        confirmedData = enrich_with_cve_evidence(filteredData)
+        confirmedData = enrich_with_cve_evidence(filteredData)  # Attach NVD CVE evidence
         prompt = generate_prompt(confirmedData)
-        report = call_LLM(prompt)
+        report = call_LLM(prompt)                               # Send enriched findings to Gemini and parse JSON response
         password = get_password()
-        print_report(report, password)
+        print_report(report, password)                          # Render and AES-256 encrypt the PDF report
 
     except KeyboardInterrupt:
         console.print("\n[yellow]Scan cancelled by user.[/yellow]")
