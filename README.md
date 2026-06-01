@@ -1,14 +1,13 @@
 # ReconGuard
 
-ReconGuard is a security reconnaissance tool designed to automate network scanning, analyze results, and generate structured reports. It integrates scanning tools with parsing and reporting modules to help identify potential vulnerabilities in a system.
+ReconGuard is a security reconnaissance tool designed to support network scanning with LLM analysis and recommendations. Users will provide the IP address of a private target to scan and receive a report listing connected devices and assessment findings. Findings consist of: vulnerability severity level, risk summary, possible exploitations, recommended actions, and verification steps to confirm the vulnerability. Information is supported with CVE evidence.
 
 ## Features
 
 * Automated network scanning
+* Support for IPv4 and IPv6 address formats
 * Input validation for secure execution
-* Run Nmap scans
-* Convert Nmap XML output to JSON
-* Analyze exposed services
+* Exposed services analysis based on known CVE vulnerabilities
 * Structured report generation (clear recommendations)
 * Modular architecture (scanner, parser, detector, report)
 
@@ -17,20 +16,18 @@ ReconGuard is a security reconnaissance tool designed to automate network scanni
 * Python 3.11+
 * Nmap
 * pip
+* Google Gemini API key
 
 ## Project Structure
 
 ```
 reconguard/
-├── detector/     # Detection logic for vulnerabilities
-├── llm/          # AI/analysis components (if applicable)
-├── logs/         # Log files
-├── parser/       # Parses scan output
-├── report/       # Generates reports
-├── scanner/      # Runs scans (e.g., Nmap)
-├── scans/        # Stored scan results
-├── main.py       # Entry point
-├── requirements.txt
+├── .github/workflows/     # CI/CD pipeline configuration
+├── src/                   # Source code modules
+├── tests/                 # Test code for automatic testing
+├── main.py                # Entry point
+├── pyproject.toml         # Configuration file for pytest
+├── requirements.txt       # Dependencies required to run program
 ```
 
 ## Installation
@@ -38,7 +35,7 @@ reconguard/
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/YOUR-ORG/reconguard.git
+git clone https://github.com/<YOUR-GIT>/reconguard.git
 cd reconguard
 ```
 
@@ -108,10 +105,12 @@ Mitigations:
 
 * Web-based dashboard
 * Real-time scan monitoring
-* Integration with vulnerability databases (CVE)
+* Additonal scan options
+* Implementation of addtional tools (ex. Wireshark)
+* Ability to pentest based on findings
 
 ## Contributors
 
-* Mohamed
-* Guy
+* Mohamed Ramadan
+* Guy Mason
 * Ellysa Alvarez
